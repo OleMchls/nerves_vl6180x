@@ -5,7 +5,7 @@ defmodule VL6180X.MixProject do
     [
       app: :nerves_vl6180x,
       version: "0.2.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
