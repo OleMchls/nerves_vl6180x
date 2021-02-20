@@ -1,6 +1,10 @@
 # Nerves_VL6180X
 
+A library to interface with the VL6180X laser time-of-flight sensor.
+
 [![](https://cdn-shop.adafruit.com/970x728/3316-15.jpg)](https://www.adafruit.com/product/3316))
+
+The VL6180X sensor works from 5mm - 100mm but with good ambient conditions can get measurements up to 200mm.
 
 ## Installation
 
@@ -19,7 +23,7 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 ## Usage
 
 ```elixir
-# Open the I2C bus
+# Open the I2C bus, optionally you can also bas the device address
 {:ok, ref} = VL6180X.open("i2c-1")
 # => {:ok, %VL6180X{bus: #Reference<0.718871911.268566539.177140>, device: 41}}
 
