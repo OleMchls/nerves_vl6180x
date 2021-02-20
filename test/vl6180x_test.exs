@@ -1,8 +1,7 @@
-defmodule Vl6180xTest do
+defmodule VL6180XTest do
   use ExUnit.Case
-  doctest Vl6180x
 
-  test "greets the world" do
-    assert Vl6180x.hello() == :world
+  test "the guilt of missing tests exists" do
+    refute :hello == :world
   end
 end
