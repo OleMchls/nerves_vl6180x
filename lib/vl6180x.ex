@@ -1,4 +1,7 @@
 defmodule VL6180X do
+  @moduledoc """
+  A library to interface with the VL6180X time-of-flight laser sensor.
+  """
   use Bitwise
 
   alias Circuits.I2C
@@ -19,6 +22,8 @@ defmodule VL6180X do
   @vl6180x_reg_result_range_status 0x04D
   @vl6180x_reg_result_interrupt_status_gpio 0x04F
 
+  @type range_states() :: :no_error | error_reaon()
+  @type error_reaon() :: atom()
   @range_states %{
     0b0000 => :no_error,
     0b0001 => :vcsel_continuity_test,
@@ -38,6 +43,7 @@ defmodule VL6180X do
     0b1111 => :ranging_algo_overflow
   }
 
+  @type gain() :: 0..7
   @als_gain_1 0x06
   @als_gain_1_25 0x05
   @als_gain_1_67 0x04
@@ -47,14 +53,29 @@ defmodule VL6180X do
   @als_gain_20 0x00
   @als_gain_40 0x07
 
+  @type t() :: %VL6180X{bus: I2C.bus(), device: I2C.address()}
   defstruct [:bus, :device]
 
+  @doc """
+  Opens the bus to the I2C channel, optionally takes the device `address`.
+
+  Returns `{:ok, ref}`.
+  """
+  @spec open(binary(), I2C.address()) :: {:ok, t()}
   def open(bus_name, address \\ @vl6180x_default_i2c_addr) do
     {:ok, ref} = I2C.open(bus_name)
     {:ok, << @vl6180x_device_model_identification_number >>} = read8(ref, address, @vl6180x_reg_identification_model_id)
     {:ok, %__MODULE__{bus: ref, device: address}}
   end
 
+  @doc """
+  Initialize the sensor.
+
+  Calling this is required before proceeding with any readings.
+
+  Returns `:ok`.
+  """
+  @spec init(t()) :: :ok | {:error, term()}
   def init(%__MODULE__{bus: bus, device: device}) do
     # private settings from page 24 of app note
     write8(bus, device, 0x0207, 0x01)
@@ -104,6 +125,19 @@ defmodule VL6180X do
     write8(bus, device, @vl6180x_reg_system_fresh_out_of_reset, 0x00)
   end
 
+  @doc """
+  Reads the distance from the sensor to the object infront.
+
+  The sensor uses the time light takes to travel to the object and bounce back.
+  The sensors operation range is between 5mm and 100mm, in practice, with good
+  you can get further distances.
+
+  This call is blocking until the sensor finishes the reading. This usually is
+  prettry fast when no error occurs.
+
+  Returns the distance as a positive integer.
+  """
+  @spec range(t()) :: pos_integer()
   def range(%__MODULE__{} = ref) do
     # wait for device to be ready for range measurement
     read8_until(ref.bus, ref.device, @vl6180x_reg_result_range_status, fn
@@ -125,6 +159,14 @@ defmodule VL6180X do
     range
   end
 
+  @doc """
+  Reads the status of the range sensor.
+
+  Returns {:ok, :no_error} when everything is correct.
+  When the sensor has encountered an error it'll return {:ok, error_reaon}.
+  IF the state could not be red from the sensor it'll return {:error, erro_reason}
+  """
+  @spec range_status(t()) :: {:ok, range_states()} | {:error, term()}
   def range_status(%__MODULE__{} = ref) do
     read8(ref.bus, ref.device, @vl6180x_reg_result_range_status)
     |> determine_range_status
@@ -134,14 +176,60 @@ defmodule VL6180X do
   defp determine_range_status({:ok, << code::4, _::4 >>}), do: {:ok, @range_states[code]}
   defp determine_range_status(return), do: return
 
+  @doc """
+  Helper function to return gain value for 1x ALS GAIN.
+  """
+  @spec als_gain_1() :: gain()
   def als_gain_1(), do: @als_gain_1
+
+  @doc """
+  Helper function to return gain value for 1.25x ALS GAIN.
+  """
+  @spec als_gain_1_25() :: gain()
   def als_gain_1_25(), do: @als_gain_1_25
+
+  @doc """
+  Helper function to return gain value for 1.67x ALS GAIN.
+  """
+  @spec als_gain_1_67() :: gain()
   def als_gain_1_67(), do: @als_gain_1_67
+
+  @doc """
+  Helper function to return gain value for 2.5x ALS GAIN.
+  """
+  @spec als_gain_2_5() :: gain()
   def als_gain_2_5(), do: @als_gain_2_5
+
+  @doc """
+  Helper function to return gain value for 5x ALS GAIN.
+  """
+  @spec als_gain_5() :: gain()
   def als_gain_5(), do: @als_gain_5
+
+  @doc """
+  Helper function to return gain value for 10x ALS GAIN.
+  """
+  @spec als_gain_10() :: gain()
   def als_gain_10(), do: @als_gain_10
+
+  @doc """
+  Helper function to return gain value for 20x ALS GAIN.
+  """
+  @spec als_gain_20() :: gain()
   def als_gain_20(), do: @als_gain_20
+
+  @doc """
+  Helper function to return gain value for 40x ALS GAIN.
+  """
+  @spec als_gain_40() :: gain()
   def als_gain_40(), do: @als_gain_40
+
+  @doc """
+  Reads the lux (light value) from the sensor.
+
+  :warn: THIS IS EXPERIMENTAL
+  """
+  @spec lux(t(), gain()) :: {:ok, float()}
   def lux(%__MODULE__{}, gain) when gain > @als_gain_40, do: {:error, :gain_too_high}
   def lux(%__MODULE__{}, gain) when gain < 0x00, do: {:error, :gain_must_be_positive}
   def lux(%__MODULE__{} = ref, gain) do
