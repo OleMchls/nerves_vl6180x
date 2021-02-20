@@ -25,7 +25,8 @@ defmodule VL6180X.MixProject do
   defp deps do
     [
       {:circuits_i2c, "~> 0.1"},
-      {:ex_doc, "~> 0.14", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 
