@@ -37,7 +37,7 @@ defmodule VL6180X.MixProject do
   defp package() do
     [
       # This option is only needed when you don't want to use the OTP application name
-      name: "vl6180x",
+      name: "nerves_vl6180x",
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/OleMchls/nerves_vl6180x"}
     ]
