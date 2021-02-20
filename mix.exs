@@ -3,7 +3,7 @@ defmodule VL6180X.MixProject do
 
   def project do
     [
-      app: :vl6180x,
+      app: :nerves_vl6180x,
       version: "0.1.0",
       elixir: "~> 1.11",
       build_embedded: Mix.env() == :prod,
@@ -11,7 +11,7 @@ defmodule VL6180X.MixProject do
       description: description(),
       package: package(),
       deps: deps(),
-      name: "Nerves_VL6180X",
+      name: "VL6180X",
       source_url: "https://github.com/OleMchls/nerves_vl6180x"
     ]
   end
