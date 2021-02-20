@@ -1,4 +1,4 @@
-defmodule Vl6180x.MixProject do
+defmodule VL6180X.MixProject do
   use Mix.Project
 
   def project do
@@ -6,23 +6,39 @@ defmodule Vl6180x.MixProject do
       app: :vl6180x,
       version: "0.1.0",
       elixir: "~> 1.11",
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      description: description(),
+      package: package(),
+      deps: deps(),
+      name: "Nerves_VL6180X",
+      source_url: "https://github.com/OleMchls/nerves_vl6180x"
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [
-      extra_applications: [:logger]
-    ]
+    []
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:circuits_i2c, "~> 0.1"},
+      {:ex_doc, "~> 0.14", only: :dev, runtime: false}
+    ]
+  end
+
+  defp description() do
+    "AboutElixir library to interface with the VL6180X Time-of-Flight sensor"
+  end
+
+  defp package() do
+    [
+      # This option is only needed when you don't want to use the OTP application name
+      name: "vl6180x",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/OleMchls/nerves_vl6180x"}
     ]
   end
 end
