@@ -31,7 +31,7 @@ defmodule VL6180X.MixProject do
   end
 
   defp description() do
-    "AboutElixir library to interface with the VL6180X Time-of-Flight sensor"
+    "Elixir library to interface with the VL6180X Time-of-Flight sensor"
   end
 
   defp package() do
